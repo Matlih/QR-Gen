@@ -18,13 +18,25 @@ A simple, beautiful, and modern QR code generator written strictly in Python. It
 **Prerequisites:**
 - Python 3.8 or higher is required.
 
-**Step 1:** Clone or download the repository, then open your terminal in the project folder.
+**Step 1:** Clone the repository to your local machine:
+```bash
+git clone https://github.com/Matlih/QR-Gen.git
+cd QR-Gen
+```
 
-**Step 2:** Install the package. We recommend using a virtual environment:
+**Step 2:** Install the package. We recommend using a virtual environment. You have two options for installation:
+
+**Option A (Recommended): Install as a Package**
+This installs the app globally in your environment, meaning you can run the `qr-gen-gui` command from anywhere:
 ```bash
 pip install -e .
 ```
-*(This installs the app and its dependencies so that the commands are available globally in your environment.)*
+
+**Option B: Install Dependencies Only**
+If you prefer not to install the project as a package, you can just install the requirements and run the python files manually:
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
