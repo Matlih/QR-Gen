@@ -51,7 +51,24 @@ def generate_qr(
     qr.add_data(url_or_text)
     qr.make(fit=True)
 
-    img = qr.make_image(fill_color=fill_color, back_color=back_color).convert("RGBA")
+    is_transparent = back_color.strip().lower() == "transparent"
+    effective_back_color = "white" if is_transparent else back_color
+
+    img = qr.make_image(fill_color=fill_color, back_color=effective_back_color).convert("RGBA")
+
+    if is_transparent:
+        from PIL import ImageColor
+        try:
+            bg_rgb = ImageColor.getrgb(effective_back_color)
+            if len(bg_rgb) == 4:
+                bg_rgb = bg_rgb[:3]
+            pixels = img.load()
+            for y in range(img.height):
+                for x in range(img.width):
+                    if pixels[x, y][:3] == bg_rgb:
+                        pixels[x, y] = (bg_rgb[0], bg_rgb[1], bg_rgb[2], 0)
+        except Exception as e:
+            logger.warning(f"Could not make background transparent: {e}")
 
     if logo_path:
         logo_path = Path(logo_path)

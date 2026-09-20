@@ -63,6 +63,15 @@ class App(ctk.CTk):
         self.bg_color_entry.insert(0, "white")
         self.bg_color_entry.grid(row=1, column=1, sticky="ew", padx=(5, 0))
 
+        self.transparent_var = ctk.BooleanVar(value=False)
+        self.transparent_checkbox = ctk.CTkCheckBox(
+            color_frame, 
+            text="Transparent Background", 
+            variable=self.transparent_var,
+            command=self.toggle_bg_color_state
+        )
+        self.transparent_checkbox.grid(row=2, column=0, columnspan=2, sticky="w", pady=(10, 0))
+
         # 3. Logo Embedding
         self.logo_label = ctk.CTkLabel(self.main_frame, text="Optional Logo:")
         self.logo_label.grid(row=3, column=0, sticky="w", padx=10)
@@ -126,6 +135,12 @@ class App(ctk.CTk):
         self.logo_path_label.configure(text="No logo selected.")
         self.clear_logo_btn.pack_forget()
 
+    def toggle_bg_color_state(self):
+        if self.transparent_var.get():
+            self.bg_color_entry.configure(state="disabled")
+        else:
+            self.bg_color_entry.configure(state="normal")
+
     def generate_preview_threaded(self):
         data = self.data_entry.get().strip()
         if not data:
@@ -144,7 +159,7 @@ class App(ctk.CTk):
                 url_or_text=self.data_entry.get().strip(),
                 output_path=temp_output,
                 fill_color=self.fg_color_entry.get().strip() or "black",
-                back_color=self.bg_color_entry.get().strip() or "white",
+                back_color="transparent" if self.transparent_var.get() else (self.bg_color_entry.get().strip() or "white"),
                 logo_path=self.logo_path
             )
             
