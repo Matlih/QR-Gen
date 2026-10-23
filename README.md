@@ -8,7 +8,8 @@ A simple, beautiful, and modern QR code generator written strictly in Python. It
 - **Generate QR Codes:** Convert any URL or text into a scannable QR code.
 - **Custom Colors:** Pick your own foreground and background colors (supports color names and hex codes like `#FF0000`).
 - **Transparent Backgrounds:** Generate QR codes with a transparent background using a simple checkbox or CLI argument.
-- **Add Logos:** Embed your custom logo right in the center of the QR code.
+- **Dedicated Logo Space:** Embed your custom logo with a dedicated, clean space in the middle to prevent QR code dots from clashing or showing through transparent logos.
+- **Customizable Logo Padding & Background:** Adjust logo space padding and customize the logo backdrop color.
 - **Quick Save:** Instantly save QR codes to a dedicated `generated` folder, or use "Save As" to pick your own location.
 - **Dark Mode Support:** The desktop app automatically matches your system's dark/light theme.
 
@@ -63,14 +64,14 @@ qr-gen "https://example.com"
 qr-gen "https://example.com" -o my_qr_code.png
 ```
 
-**Change Colors & Add Logo (Supports Hex):**
+**Change Colors & Add Logo (Supports Hex & Custom Logo Space):**
 ```bash
-qr-gen "https://example.com" -fc "#000000" -bc "#FFFFFF" -l my_logo.png
+qr-gen "https://example.com" -fc "#000000" -bc "#FFFFFF" -l my_logo.png -lp 8
 ```
 
-**Transparent Background:**
+**Transparent Background (with Logo):**
 ```bash
-qr-gen "https://example.com" -bc transparent
+qr-gen "https://example.com" -bc transparent -l my_logo.png
 ```
 *(Use `qr-gen --help` to see all available terminal options!)*
 

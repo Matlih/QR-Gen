@@ -33,3 +33,35 @@ def test_generate_qr_with_logo_not_found(tmp_path):
             output_path=tmp_path / "logo_qr.png",
             logo_path="non_existent_logo.png"
         )
+
+def test_generate_qr_with_logo_space(tmp_path):
+    from PIL import Image
+    logo_file = tmp_path / "dummy_logo.png"
+    Image.new("RGBA", (50, 50), (255, 0, 0, 255)).save(logo_file)
+
+    output_file = tmp_path / "qr_with_logo.png"
+    result = generate_qr(
+        "https://example.com",
+        output_path=output_file,
+        logo_path=logo_file,
+        logo_padding=8,
+    )
+    assert result.exists()
+    assert result.stat().st_size > 0
+
+def test_generate_qr_with_logo_and_custom_bg(tmp_path):
+    from PIL import Image
+    logo_file = tmp_path / "dummy_logo.png"
+    Image.new("RGBA", (40, 40), (0, 128, 255, 255)).save(logo_file)
+
+    output_file = tmp_path / "qr_with_custom_logo_bg.png"
+    result = generate_qr(
+        "https://example.com",
+        output_path=output_file,
+        logo_path=logo_file,
+        logo_bg_color="#FFFFFF",
+        back_color="transparent",
+        logo_padding=10,
+    )
+    assert result.exists()
+    assert result.stat().st_size > 0

@@ -24,6 +24,12 @@ def main():
     parser.add_argument(
         "-s", "--size", type=int, default=10, help="Box size for the QR grid (default: 10)"
     )
+    parser.add_argument(
+        "-lp", "--logo-padding", type=int, default=6, help="Padding in pixels around logo space (default: 6)"
+    )
+    parser.add_argument(
+        "-lbc", "--logo-bg-color", default=None, help="Background color for logo space (default: matches QR background)"
+    )
 
     args = parser.parse_args()
 
@@ -35,6 +41,8 @@ def main():
             fill_color=args.fill_color,
             back_color=args.back_color,
             logo_path=args.logo,
+            logo_padding=args.logo_padding,
+            logo_bg_color=args.logo_bg_color,
         )
         print(f"Success! QR code saved to: {saved_path}")
     except Exception as e:

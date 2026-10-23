@@ -77,7 +77,7 @@ class App(ctk.CTk):
         self.logo_label.grid(row=3, column=0, sticky="w", padx=10)
         
         logo_btn_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        logo_btn_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=(0, 20))
+        logo_btn_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=(0, 10))
         
         self.logo_btn = ctk.CTkButton(logo_btn_frame, text="Browse Logo...", command=self.browse_logo)
         self.logo_btn.pack(side="left")
@@ -86,6 +86,23 @@ class App(ctk.CTk):
         self.logo_path_label.pack(side="left", padx=10)
 
         self.clear_logo_btn = ctk.CTkButton(logo_btn_frame, text="X", width=30, fg_color="red", command=self.clear_logo)
+
+        # Logo Space Options (Padding and Background)
+        logo_options_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        logo_options_frame.grid(row=5, column=0, sticky="ew", padx=10, pady=(0, 20))
+        logo_options_frame.grid_columnconfigure(0, weight=1)
+        logo_options_frame.grid_columnconfigure(1, weight=1)
+
+        self.logo_pad_label = ctk.CTkLabel(logo_options_frame, text="Logo Space Padding (px):")
+        self.logo_pad_label.grid(row=0, column=0, sticky="w")
+        self.logo_pad_entry = ctk.CTkEntry(logo_options_frame, placeholder_text="e.g. 6")
+        self.logo_pad_entry.insert(0, "6")
+        self.logo_pad_entry.grid(row=1, column=0, sticky="ew", padx=(0, 5))
+
+        self.logo_bg_label = ctk.CTkLabel(logo_options_frame, text="Logo Space Background:")
+        self.logo_bg_label.grid(row=0, column=1, sticky="w", padx=(5, 0))
+        self.logo_bg_entry = ctk.CTkEntry(logo_options_frame, placeholder_text="Auto (matches QR background)")
+        self.logo_bg_entry.grid(row=1, column=1, sticky="ew", padx=(5, 0))
         
         # 4. Generate Button
         self.generate_btn = ctk.CTkButton(
@@ -95,11 +112,11 @@ class App(ctk.CTk):
             height=40,
             font=ctk.CTkFont(size=15, weight="bold")
         )
-        self.generate_btn.grid(row=5, column=0, sticky="ew", padx=10, pady=10)
+        self.generate_btn.grid(row=6, column=0, sticky="ew", padx=10, pady=10)
 
         # 5. Preview Image
         self.preview_label = ctk.CTkLabel(self.main_frame, text="")
-        self.preview_label.grid(row=6, column=0, pady=20)
+        self.preview_label.grid(row=7, column=0, pady=20)
 
         # 6. Save Buttons Frame (Hidden initially)
         self.save_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
@@ -155,12 +172,22 @@ class App(ctk.CTk):
         try:
             # We save a temporary file for the preview
             temp_output = "temp_preview_qr.png"
+            
+            pad_val = 6
+            pad_text = self.logo_pad_entry.get().strip()
+            if pad_text.isdigit():
+                pad_val = int(pad_text)
+                
+            logo_bg = self.logo_bg_entry.get().strip() or None
+
             generate_qr(
                 url_or_text=self.data_entry.get().strip(),
                 output_path=temp_output,
                 fill_color=self.fg_color_entry.get().strip() or "black",
                 back_color="transparent" if self.transparent_var.get() else (self.bg_color_entry.get().strip() or "white"),
-                logo_path=self.logo_path
+                logo_path=self.logo_path,
+                logo_padding=pad_val,
+                logo_bg_color=logo_bg,
             )
             
             self.current_qr_path = temp_output
@@ -184,7 +211,7 @@ class App(ctk.CTk):
 
     def _update_preview_ui(self, ctk_img):
         self.preview_label.configure(image=ctk_img, text="")
-        self.save_frame.grid(row=7, column=0, pady=(0, 20))
+        self.save_frame.grid(row=8, column=0, pady=(0, 20))
 
     def save_image(self):
         if not self.current_qr_path:

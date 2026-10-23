@@ -15,10 +15,12 @@ def generate_qr(
     fill_color: str = "black",
     back_color: str = "white",
     logo_path: Optional[Union[str, Path]] = None,
+    logo_padding: int = 6,
+    logo_bg_color: Optional[str] = None,
 ) -> Path:
     """
     Generate a QR code image from a URL or text and save it as PNG.
-    Optionally, embed a logo in the center and customize colors.
+    Optionally, embed a logo in the center with a dedicated clean space and customize colors.
 
     Args:
         url_or_text: The string to encode in the QR code.
@@ -28,6 +30,8 @@ def generate_qr(
         fill_color: Color of the QR code data modules.
         back_color: Background color of the QR code.
         logo_path: Optional path to an image to embed in the center.
+        logo_padding: Padding in pixels around the logo's dedicated space.
+        logo_bg_color: Background color for the logo space (matches QR background by default).
 
     Returns:
         Path to the saved image.
@@ -76,21 +80,50 @@ def generate_qr(
             raise FileNotFoundError(f"Logo file not found: {logo_path}")
         
         try:
+            from PIL import ImageColor, ImageDraw
             logo = Image.open(logo_path).convert("RGBA")
             
-            # Calculate the logo size (usually around 1/4th to 1/3rd of the QR code size)
-            basewidth = int(img.size[0] / 3.5)
-            wpercent = (basewidth / float(logo.size[0]))
-            hsize = int((float(logo.size[1]) * float(wpercent)))
-            logo = logo.resize((basewidth, hsize), Image.Resampling.LANCZOS)
+            # Proportionally scale logo to fit comfortably in the center (max ~1/3.8 of QR code size)
+            max_logo_dim = max(10, int(img.size[0] / 3.8))
+            logo.thumbnail((max_logo_dim, max_logo_dim), Image.Resampling.LANCZOS)
             
-            # Calculate the position to center the logo
-            pos = (
-                (img.size[0] - logo.size[0]) // 2,
-                (img.size[1] - logo.size[1]) // 2
+            lw, lh = logo.size
+            pos = ((img.size[0] - lw) // 2, (img.size[1] - lh) // 2)
+            
+            # Create reserved space (quiet zone / badge) for the logo in the middle
+            pad = max(0, int(logo_padding))
+            radius = min(6, pad) if pad > 0 else 0
+            bg_box = (pos[0] - pad, pos[1] - pad, pos[0] + lw + pad, pos[1] + lh + pad)
+            
+            target_bg = (
+                logo_bg_color.strip()
+                if logo_bg_color and logo_bg_color.strip()
+                else ("transparent" if is_transparent else effective_back_color)
             )
             
-            # Paste the logo on the QR code
+            if target_bg.lower() == "transparent":
+                # Clear all pixels in the reserved logo space (removes QR modules in the center)
+                mask = Image.new("L", img.size, 0)
+                mask_draw = ImageDraw.Draw(mask)
+                if radius > 0:
+                    mask_draw.rounded_rectangle(bg_box, radius=radius, fill=255)
+                else:
+                    mask_draw.rectangle(bg_box, fill=255)
+                trans = Image.new("RGBA", img.size, (0, 0, 0, 0))
+                img.paste(trans, (0, 0), mask=mask)
+            else:
+                # Fill the reserved logo space with the specified or matching background color
+                bg_rgb = ImageColor.getrgb(target_bg)
+                bg_rgba = (bg_rgb[0], bg_rgb[1], bg_rgb[2], 255) if len(bg_rgb) == 3 else bg_rgb
+                badge = Image.new("RGBA", img.size, (0, 0, 0, 0))
+                badge_draw = ImageDraw.Draw(badge)
+                if radius > 0:
+                    badge_draw.rounded_rectangle(bg_box, radius=radius, fill=bg_rgba)
+                else:
+                    badge_draw.rectangle(bg_box, fill=bg_rgba)
+                img.paste(badge, (0, 0), mask=badge)
+            
+            # Paste the logo in the center of its reserved space
             img.paste(logo, pos, mask=logo)
         except Exception as e:
             logger.error(f"Failed to apply logo: {e}")
